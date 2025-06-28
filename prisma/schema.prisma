@@ -1,22 +1,58 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MEMBER
+  MANAGER
+}
+
+model Tenant {
+  id         String       @id @default(uuid())
+  name       String
+  subdomain  String       @unique
+  createAt   DateTime     @default(now())
+  updateAt   DateTime     @updatedAt
+  tenantUser TenantUser[]
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  tenantUser   TenantUser[]
+}
+
+// join table for many-to-many relationship between User and Tenant
+model TenantUser {
+  userId   String
+  tenantId String 
+  role    Role
+  user     User   @relation(fields: [userId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  @@id([userId, tenantId])
 }
 
 model Employee {
   id               String       @id @default(uuid())
+  tenantId         String
   name             String
   dateOfBirth      String
   gender           String
   email            String
   designation      String
   department       String
-  employmentType String
+  employmentType   String
   dateOfJoining    String
   workLocation     String
   createAt         DateTime     @default(now())
@@ -24,19 +60,25 @@ model Employee {
   workLocationMeta WorkLocation @relation(fields: [workLocation], references: [id])
   departmentMeta   Department   @relation(fields: [department], references: [id])
   designationMeta  Designation  @relation(fields: [designation], references: [id])
+
+  @@unique([tenantId, id])
 }
 
 model Designation {
   id             String     @id @default(uuid())
+  tenantId       String
   name           String
   totalEmployees Int        @default(0)
   createAt       DateTime   @default(now())
   updateAt       DateTime   @updatedAt
   employees      Employee[]
+
+  @@unique([tenantId, id])
 }
 
 model Department {
   id             String     @id @default(uuid())
+  tenantId       String
   name           String
   totalEmployees Int        @default(0)
   code           String
@@ -44,10 +86,13 @@ model Department {
   createAt       DateTime   @default(now())
   updateAt       DateTime   @updatedAt
   employees      Employee[]
+
+  @@unique([tenantId, id])
 }
 
 model WorkLocation {
   id             String     @id @default(uuid())
+  tenantId       String
   name           String
   state          String
   city           String
@@ -58,13 +103,6 @@ model WorkLocation {
   createAt       DateTime   @default(now())
   updateAt       DateTime   @updatedAt
   employees      Employee[]
-}
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  passwordHash  String
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@unique([tenantId, id])
 }

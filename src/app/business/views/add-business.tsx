@@ -7,28 +7,30 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Controller, useForm } from 'react-hook-form'
 import RequiredLabel from '@/components/ui/required-label'
 import { Loader, PlusIcon } from 'lucide-react'
-import { saveDesignation, updateDesignation } from './action'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { DesignationFormValues, designationSchema } from '@/lib/types'
+import { BusinessFormValues, BusinessSchema, DesignationFormValues, designationSchema,  } from '@/lib/types'
 import { toast } from 'sonner'
-import { Designation } from '@prisma/client'
+import { saveBusiness } from './action'
+import { updateDesignation } from '@/app/(dashboard)/settings/views/tabs/designation/action'
+import { useUser } from '@/components/user-provider'
 
-type FormProps = {
-  designation?: Designation | null
-  showForm: boolean
-  toggleForm: () => void
-}
 
-const Form = ({ designation, showForm, toggleForm }: FormProps) => {
-  const [saveState, saveAction, isSavePending] = useActionState(saveDesignation, undefined)
-  const [updateState, updateAction, isUpdatePending] = useActionState(updateDesignation, undefined)
+const AddBusiness = () => {
+  const [saveState, saveAction, isSavePending] = useActionState(saveBusiness, undefined)
+  const [showForm, setShowForm] = useState(false)
 
-  const state = saveState || updateState
-  const isPending = isSavePending || isUpdatePending
+  const toggleForm = () => {
+    setShowForm(!showForm)
+  }
 
-  const defaultValues = {
-    id: designation?.id || '',
-    name: designation?.name || ''
+  const state = saveState 
+  const isPending = isSavePending 
+  const {user} = useUser()
+
+  const defaultValues:BusinessFormValues = {
+    name:'',
+    ownerId:user?.userId || '',
+    subdomain:''
   }
 
   const {
@@ -36,9 +38,9 @@ const Form = ({ designation, showForm, toggleForm }: FormProps) => {
     reset,
     formState: { isValid },
     handleSubmit
-  } = useForm<DesignationFormValues>({
+  } = useForm<BusinessFormValues>({
     defaultValues,
-    resolver: zodResolver(designationSchema),
+    resolver: zodResolver(BusinessSchema),
     mode: 'onChange'
   })
 
@@ -55,47 +57,51 @@ const Form = ({ designation, showForm, toggleForm }: FormProps) => {
     if (state?.message) {
       toast.success(state.message)
     }
-  }, [updateState, saveState])
+  }, [ saveState])
 
   useEffect(() => {
     if (showForm) reset(defaultValues)
   }, [showForm])
 
-  const onSubmit = (data: DesignationFormValues) => {
+  const onSubmit = (data: BusinessFormValues) => {
     const formData = new FormData()
 
     Object.keys(data).forEach(key => {
       formData.append(key, data[key as keyof typeof data].toString())
     })
 
-    if (designation?.id) {
-      formData.append('id', designation?.id ?? '')
-      startTransition(() => updateAction(formData))
-    } else {
-      startTransition(() => saveAction(formData))
-    }
+
+    startTransition(() => saveAction(formData))
   }
 
   return (
     <Dialog open={showForm} onOpenChange={onClose}>
       <DialogTrigger asChild>
         <Button className='max-w-fit' onClick={onClose}>
-          <PlusIcon />
-          Create Designation
+           <PlusIcon className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-200" />
+          Create Business
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Create Designation</DialogTitle>
+          <DialogTitle>Create Business</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
           <div className='flex gap-4'>
-            <div className='grid w-full items-center gap-1.5'>
-              <RequiredLabel htmlFor='name'>Designation Name</RequiredLabel>
+            <div className='grid w-1/2 items-center gap-1.5'>
+              <RequiredLabel htmlFor='name'>Business Name</RequiredLabel>
               <Controller
                 name='name'
                 control={control}
-                render={({ field }) => <Input {...field} id='name' placeholder='Software Engineer' />}
+                render={({ field }) => <Input {...field} id='name' placeholder='Horizontal Pvt Ltd' />}
+              />
+            </div>
+            <div className='grid w-1/2 items-center gap-1.5'>
+              <RequiredLabel htmlFor='subdomain'>Subdomain</RequiredLabel>
+              <Controller
+                name='subdomain'
+                control={control}
+                render={({ field }) => <Input {...field} onChange={(e) => field.onChange(e.target.value.toLowerCase())} id='subdomain' placeholder='horizontal' />}
               />
             </div>
           </div>
@@ -111,4 +117,4 @@ const Form = ({ designation, showForm, toggleForm }: FormProps) => {
   )
 }
 
-export default Form
+export default AddBusiness

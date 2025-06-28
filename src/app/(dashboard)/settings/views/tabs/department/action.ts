@@ -1,101 +1,128 @@
 'use server'
 
-import prisma from "@/lib/prisma"
-import { departmentSchema } from "@/lib/types"
-import { revalidatePath } from "next/cache"
+import { getValidSession } from "@/lib/session";
+import prisma from "@/lib/prisma";
+import { departmentSchema } from "@/lib/types";
+import { revalidatePath } from "next/cache";
 
-export async function saveDepartment(prevState: any,
-    formData: FormData
-) {
-
-    const result = departmentSchema.safeParse(Object.fromEntries(formData))
+// CREATE
+export async function saveDepartment(prevState: any, formData: FormData) {
+    const result = departmentSchema.safeParse(Object.fromEntries(formData));
 
     if (!result.success) {
         return {
             status: false,
-            message: 'Invalid department'
-        }
+            message: "Invalid department",
+        };
     }
 
     try {
+        const session = await getValidSession();
+        if (!session.status) return session;
+
+        const businessId = session.data?.businessId as string;
+
+
         await prisma.department.create({
-            data: result.data
-        })
-    } catch (err) { 
+            data: {
+                ...result.data,
+                tenantId: businessId,
+            },
+        });
+
+        revalidatePath("/settings");
+        return {
+            status: true,
+            message: "Department created successfully",
+        };
+    } catch (err) {
         return {
             status: false,
-            message: 'Data base error occurred',
-        }
+            message: "Database error occurred",
+        };
     }
-    
-    revalidatePath('/settings')
-    return {
-        status: true,
-        message: 'Department created successfully'
-    }
-
 }
 
-
-
+// UPDATE
 export async function updateDepartment(prevState: any, formData: FormData) {
-    const parsed = departmentSchema.safeParse(Object.fromEntries(formData))
+    const parsed = departmentSchema.safeParse(Object.fromEntries(formData));
     if (!parsed.success) {
         return {
             status: false,
-            message: 'Please fill all the required fields',
-            error: parsed.error.message
-        }
+            message: "Please fill all the required fields",
+            error: parsed.error.message,
+        };
     }
 
     try {
+        const session = await getValidSession();
+        if (!session.status) return session;
+
+        const businessId = session.data?.businessId as string;
+
+
         await prisma.department.update({
             where: {
-                id: parsed.data.id
+                tenantId_id: {
+                    tenantId: businessId,
+                    id: parsed.data.id,
+                },
             },
-            data: parsed.data
-        })
+            data: parsed.data,
+        });
+
+        revalidatePath("/settings");
+
+        return {
+            status: true,
+            message: "Department updated successfully",
+            error: null,
+        };
     } catch (err) {
         return {
             status: false,
-            message: 'Data base error occurred',
-            error: err
-        }
-    }
-    revalidatePath('/settings')
-
-    return {
-        status: true,
-        message: 'Department updated successfully',
-        error: null
+            message: "Database error occurred",
+            error: err,
+        };
     }
 }
 
-export async function deleteDepartment(id:string) {
-    if (!id) return {
-        status: false,
-        message: 'Department not found',
-        error: null
-    }
+// DELETE
+export async function deleteDepartment(id: string) {
+    if (!id)
+        return {
+            status: false,
+            message: "Department not found",
+            error: null,
+        };
 
     try {
+        const session = await getValidSession();
+        if (!session.status) return session;
+
+        const businessId = session.data?.businessId as string;
+
         await prisma.department.delete({
             where: {
-                id: id
+                tenantId_id: {
+                    tenantId: businessId,
+                    id,
+                },
             },
-        })
+        });
+
+        revalidatePath("/settings");
+
+        return {
+            status: true,
+            message: "Department deleted successfully",
+            error: null,
+        };
     } catch (err) {
         return {
             status: false,
-            message: 'Data base error occurred',
-            error: err
-        }
-    }
-     revalidatePath('/settings')
-
-    return {
-        status: true,
-        message: 'Department deleted successfully',
-        error: null
+            message: "Database error occurred",
+            error: err,
+        };
     }
 }

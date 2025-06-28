@@ -11,7 +11,7 @@ import { saveWorkLocation, updateWorkLocation } from './action'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { WorkLocationFormValues, workLocationSchema } from '@/lib/types'
 import { toast } from 'sonner'
-import { WorkLocation } from '@/generated/prisma'
+import { WorkLocation } from '@prisma/client'
 
 type FormProps = {
   workLocation?: WorkLocation | null

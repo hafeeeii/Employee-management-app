@@ -1,7 +1,10 @@
 'use server'
 import prisma from "@/lib/prisma"
+import { getValidSession } from "@/lib/session"
 import { EmployeeSchema } from "@/lib/types"
 import { revalidatePath } from "next/cache"
+
+
 
 
 export async function saveEmployee(prevState: any, formData: FormData) {
@@ -15,11 +18,22 @@ export async function saveEmployee(prevState: any, formData: FormData) {
     }
 
     try {
-        await prisma.employee.create({ data: parsed.data })
-    } catch (err) {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+
+        const businessId = session.data?.businessId as string
+        await prisma.employee.create({
+            data: {
+                ...parsed.data,
+                tenantId: businessId
+            }
+        })
+    } catch (err:any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: err
         }
     }
@@ -44,16 +58,24 @@ export async function updateEmployee(prevState: any, formData: FormData) {
     }
 
     try {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+        const businessId = session.data?.businessId as string
         await prisma.employee.update({
             where: {
-                id: parsed.data.id
+                tenantId_id: {
+                    tenantId: businessId,
+                    id: parsed.data.id
+                }
             },
             data: parsed.data
         })
-    } catch (err) {
+    } catch (err:any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: err
         }
     }
@@ -66,7 +88,7 @@ export async function updateEmployee(prevState: any, formData: FormData) {
     }
 }
 
-export async function deleteEmployee(id:string) {
+export async function deleteEmployee(id: string) {
     if (!id) return {
         status: false,
         message: 'Employee not found',
@@ -74,15 +96,23 @@ export async function deleteEmployee(id:string) {
     }
 
     try {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+        const businessId = session.data?.businessId as string
         await prisma.employee.delete({
             where: {
-                id: id
+                tenantId_id: {
+                    tenantId: businessId,
+                    id
+                }
             },
         })
-    } catch (err) {
+    } catch (err:any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: err
         }
     }

@@ -1,7 +1,8 @@
 import { EmployeeWithRelations } from "@/lib/types"
+import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = 'http://localhost:3000/api/employees'
+const BASE_URL = baseUrl + '/api/employees'
 
 export const getEmployees = async (queryParams: { [key: string]: string }): Promise<EmployeeWithRelations[]> => {
   const { sortBy, sortOrder, name, email, page, pageSize } = queryParams

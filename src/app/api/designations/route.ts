@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getValidSession } from "@/lib/session";
 
 const validSortFields = ['name'];
 const validSortOrders = ['asc', 'desc'];
@@ -17,6 +18,11 @@ export async function GET(request: NextRequest) {
     const sortBy = validSortFields.includes(sortByParam) ? sortByParam : 'name'
     const sortOrder = validSortOrders.includes(sortOrderParam.toLowerCase()) ? sortOrderParam : 'asc'
 
+    const session = await getValidSession();
+    if (!session.status) {
+      return NextResponse.json(session, { status: 401 }); 
+    }
+    const businessId = session.data?.businessId as string;
 
     const designations = await prisma.designation.findMany({
       skip: parseInt(page) * parseInt(pageSize),
@@ -26,6 +32,7 @@ export async function GET(request: NextRequest) {
       },
       where: {
         ...(name && { name: { contains: name } }),
+        tenantId: businessId
       },
       orderBy: [
         {
@@ -33,6 +40,7 @@ export async function GET(request: NextRequest) {
         }
       ],
     });
+
     const udpatedDesignations = designations.map((item) => ({
       ...item,
       totalEmployees: item.employees.length
@@ -40,7 +48,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(udpatedDesignations);
   } catch (error) {
-    console.error(error, "Error fetching designations");
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
 import { SharedTable } from '@/components/shared-table'
 import React from 'react'
 import Form from './form'
-import { WorkLocation } from '@/generated/prisma'
+import { WorkLocation } from '@prisma/client'
 import { getWorkLocation } from '@/services/work-location'
 import { deleteWorkLocation } from './action'
 

@@ -1,7 +1,8 @@
-import { Designation } from "@/generated/prisma"
+import { Designation } from '@prisma/client'
+import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = 'http://localhost:3000/api/designations'
+const BASE_URL = baseUrl + '/api/designations'
 
 export const getDesignations = async (queryParams?: { [key: string]: string }): Promise<Designation[]> => {
 

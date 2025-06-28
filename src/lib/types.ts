@@ -1,4 +1,4 @@
-import { Department, Designation, Employee, Prisma, WorkLocation } from "@/generated/prisma";
+import { Department, Designation, Employee, Prisma, Tenant, TenantUser, User, WorkLocation } from '@prisma/client';
 import { z } from "zod";
 
 const required = (name:string) => z.string().min(1, {message:`${name} is required`}).trim()
@@ -69,6 +69,25 @@ export type EmployeeWithRelations = Employee & {
     departmentMeta: Department,
     designationMeta: Designation
 }
+
+export type TenantUserWithRelations = TenantUser & {
+    user: User,
+    tenant: Tenant
+}
+export type UserWithRelations = User & {
+    tenantUser: TenantUserWithRelations[]
+}
+
+
+export const BusinessSchema = z.object({
+    ownerId: required('Owner ID'),
+    name: required('Name'),
+    subdomain: required('Subdomain').regex(/^[a-z0-9-]+$/, {
+      message: 'Only lowercase letters, numbers, and hyphens are allowed.'
+    }),
+})
+
+export type BusinessFormValues = z.infer<typeof BusinessSchema>
 
 
 

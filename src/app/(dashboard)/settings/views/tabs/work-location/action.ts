@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from "@/lib/prisma"
+import { getValidSession } from "@/lib/session"
 import { workLocationSchema } from "@/lib/types"
 import { revalidatePath } from "next/cache"
 
@@ -19,13 +20,23 @@ export async function saveWorkLocation(prevState: any,
     }
 
     try {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+
+        const businessId = session.data?.businessId as string
+
         await prisma.workLocation.create({
-            data: parsed.data
+            data: {
+                ...parsed.data,
+                tenantId: businessId
+            }
         })
-    } catch (err) {
+    } catch (err: any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
         }
     }
 
@@ -47,16 +58,25 @@ export async function updateWorkLocation(prevState: any, formData: FormData) {
     }
 
     try {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+        const businessId = session.data?.businessId as string
+
         await prisma.workLocation.update({
             where: {
-                id: parsed.data.id
+                tenantId_id: {
+                    tenantId: businessId,
+                    id: parsed.data.id
+                }
             },
             data: parsed.data
         })
-    } catch (err) {
+    } catch (err: any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: err
         }
     }
@@ -69,7 +89,7 @@ export async function updateWorkLocation(prevState: any, formData: FormData) {
     }
 }
 
-export async function deleteWorkLocation(id:string) {
+export async function deleteWorkLocation(id: string) {
     if (!id) return {
         status: false,
         message: 'Work location not found',
@@ -77,19 +97,26 @@ export async function deleteWorkLocation(id:string) {
     }
 
     try {
+        const session = await getValidSession()
+        if (!session.status) {
+            return session
+        }
+        const businessId = session.data?.businessId as string
+
         await prisma.workLocation.delete({
             where: {
-                id: id
+                tenantId: businessId,
+                id
             },
         })
-    } catch (err) {
+    } catch (err: any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: err
         }
     }
-     revalidatePath('/settings')
+    revalidatePath('/settings')
 
     return {
         status: true,

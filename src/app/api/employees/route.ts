@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getValidSession } from "@/lib/session";
 
 const validSortFields = ['name', 'email'];
 const validSortOrders = ['asc', 'desc'];
@@ -17,6 +18,12 @@ export async function GET(request: NextRequest) {
     const sortBy = validSortFields.includes(sortByParam) ? sortByParam : 'name'
     const sortOrder = validSortOrders.includes(sortOrderParam.toLowerCase()) ? sortOrderParam : 'asc'
 
+      const session = await getValidSession();
+        if (!session.status) {
+          return NextResponse.json(session, { status: 401 }); 
+        }
+        const businessId = session.data?.businessId as string;
+    
 
     const employees = await prisma.employee.findMany({
       skip: parseInt(page) * parseInt(pageSize),
@@ -24,6 +31,7 @@ export async function GET(request: NextRequest) {
       where: {
         ...(name && { name: { contains: name } }),
         ...(email && { email: { contains: email } }),
+        tenantId: businessId
       },
       orderBy: [
         {

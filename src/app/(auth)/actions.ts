@@ -42,10 +42,10 @@ export async function signUp(prevState: any, formData: FormData) {
         })
 
         await createSession(newUser.id)
-    } catch (err) {
+    } catch (err:any) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred: ' + err?.message,
             error: null
         }
     }
@@ -92,7 +92,7 @@ export async function login(prevState: any, formData: FormData) {
     } catch (err) {
         return {
             status: false,
-            message: 'Data base error occurred',
+            message: 'Data base error occurred' + err,
             error: null
         }
     }

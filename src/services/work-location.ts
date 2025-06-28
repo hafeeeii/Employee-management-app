@@ -1,7 +1,8 @@
-import { WorkLocation } from "@/generated/prisma"
+import { WorkLocation } from '@prisma/client'
+import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = 'http://localhost:3000/api/work-locations'
+const BASE_URL = baseUrl +'/api/work-locations'
 
 export const getWorkLocations = async (queryParams?: { [key: string]: string }): Promise<WorkLocation[]> => {
 

@@ -3,7 +3,7 @@ import { SharedTable } from '@/components/shared-table'
 import React from 'react'
 import Form from './form'
 import { getDesignation } from '@/services/designation'
-import { Designation } from '@/generated/prisma'
+import { Designation } from '@prisma/client'
 import { deleteDesignation } from './action'
 
 type DesignationTabProps = {

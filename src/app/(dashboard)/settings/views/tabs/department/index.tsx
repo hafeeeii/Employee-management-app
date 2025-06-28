@@ -2,7 +2,7 @@
 import { SharedTable } from '@/components/shared-table'
 import React from 'react'
 import Form from './form'
-import { Department} from '@/generated/prisma'
+import { Department} from '@prisma/client'
 import { getDepartment } from '@/services/department'
 import { deleteDepartment } from './action'
 

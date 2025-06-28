@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Autocomplete } from '@/components/ui/autocomplete'
 import { Controller, useForm } from 'react-hook-form'
 import RequiredLabel from '@/components/ui/required-label'
-import { Department, Designation, Employee, WorkLocation } from '@/generated/prisma'
+import { Department, Designation, Employee, WorkLocation } from '@prisma/client'
 import { DrawerClose, DrawerFooter } from '@/components/ui/drawer'
 import { saveEmployee, updateEmployee } from './action'
 import { toast } from 'sonner'

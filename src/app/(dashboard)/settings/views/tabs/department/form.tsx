@@ -14,7 +14,7 @@ import { DepartmentFormValues, departmentSchema } from '@/lib/types'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
-import { Department } from '@/generated/prisma'
+import { Department } from '@prisma/client'
 
 type FormProps = {
   department?: Department | null

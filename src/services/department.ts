@@ -1,8 +1,9 @@
 
-import { Department } from "@/generated/prisma"
+import { Department } from '@prisma/client'
+import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = 'http://localhost:3000/api/departments'
+const BASE_URL = baseUrl + '/api/departments'
 
 export const getDepartments = async (queryParams?: { [key: string]: string }): Promise<Department[]> => {
 

@@ -3,7 +3,7 @@ import Dashboard from './views'
 
 const DashboardPage = () => {
   return (
-    <Dashboard/>
+      <Dashboard/>
   )
 }
 
