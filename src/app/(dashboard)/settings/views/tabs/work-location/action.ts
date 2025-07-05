@@ -12,12 +12,15 @@ export async function saveWorkLocation(prevState: any,
 
     const parsed = workLocationSchema.safeParse(Object.fromEntries(formData))
 
+
     if (!parsed.success) {
         return {
             status: false,
             message: 'Invalid work location'
         }
     }
+
+    const { id, ...rest } = parsed.data
 
     try {
         const business = await getBusinessId()
@@ -30,7 +33,7 @@ export async function saveWorkLocation(prevState: any,
 
         await prisma.workLocation.create({
             data: {
-                ...parsed.data,
+                ...rest,
                 tenantId: businessId
             }
         })

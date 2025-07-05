@@ -15,14 +15,16 @@ import Typography from "@/components/ui/typography"
 import { getDepartments } from "@/services/department"
 import { getDesignations } from "@/services/designation"
 import { getWorkLocations } from "@/services/work-location"
+import { cookies } from "next/headers"
 
 
 
  const Settings = async ({searchParams}:{searchParams:{[key:string]:string}}) => {
 
-   const departments = await getDepartments(searchParams)
-    const designations = await getDesignations(searchParams)
-    const workLocations = await getWorkLocations(searchParams)
+   const departments = await getDepartments((await cookies()).toString(), searchParams,)
+    const designations = await getDesignations((await cookies()).toString(), searchParams,)
+    const workLocations = await getWorkLocations((await cookies()).toString(),searchParams)
+
 
     const tabs = [
   {tab:'Designation', content: <DesignationTab designations={designations}/>},

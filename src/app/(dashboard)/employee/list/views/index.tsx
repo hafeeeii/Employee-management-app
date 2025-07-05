@@ -2,7 +2,7 @@
 import { SharedTable } from '@/components/shared-table'
 import React from 'react'
 import Form from './form'
-import { getEmployee, getEmployees } from '@/services/employee'
+import { getEmployee } from '@/services/employee'
 import { Department, Designation, Employee, WorkLocation } from '@prisma/client'
 import { EmployeeWithRelations } from '@/lib/types'
 import { deleteEmployee } from './action'

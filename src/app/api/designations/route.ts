@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
     const sortBy = validSortFields.includes(sortByParam) ? sortByParam : 'name'
     const sortOrder = validSortOrders.includes(sortOrderParam.toLowerCase()) ? sortOrderParam : 'asc'
 
+      const cookie = request.headers.get('cookie');
+  console.error('RECEIVED COOKIE:', cookie); // ✅ should not be undefined
+
+
     const business = await getBusinessId()
 
     if (!business.status) {

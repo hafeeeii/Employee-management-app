@@ -5,8 +5,6 @@ import { EmployeeSchema } from "@/lib/types"
 import { revalidatePath } from "next/cache"
 
 
-
-
 export async function saveEmployee(prevState: any, formData: FormData) {
     const parsed = EmployeeSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) {
@@ -16,6 +14,8 @@ export async function saveEmployee(prevState: any, formData: FormData) {
             error: parsed.error.message
         }
     }
+
+    const { id, ...rest } = parsed.data
 
     try {
         const business = await getBusinessId()
@@ -28,7 +28,7 @@ export async function saveEmployee(prevState: any, formData: FormData) {
 
         await prisma.employee.create({
             data: {
-                ...parsed.data,
+                ...rest,
                 tenantId: businessId
             }
         })

@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     cookieStore.set('businessId', businessId, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'none',
     })
 
 

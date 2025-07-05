@@ -3,9 +3,9 @@ import { Department } from '@prisma/client'
 import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = baseUrl + '/api/departments'
-
-export const getDepartments = async (queryParams?: { [key: string]: string }): Promise<Department[]> => {
+const isServer = typeof window === 'undefined';
+const BASE_URL = isServer ? baseUrl + '/api/departments' : '/api/departments';
+export const getDepartments = async ( cookie:string,queryParams?: { [key: string]: string }): Promise<Department[]> => {
 
   let params = new URLSearchParams()
   if (queryParams) {
@@ -19,8 +19,13 @@ export const getDepartments = async (queryParams?: { [key: string]: string }): P
   }
 
   try {
-    const res = await fetch(`${BASE_URL}?${params.toString()}`)
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+      headers: {
+        Cookie: cookie
+      }
+    })
     const data = await res.json()
+    console.log(data,'data')
     return data
   } catch (error) {
     toast.error('Error fetching department')

@@ -38,7 +38,7 @@ const Form = ({ departments, designations, workLocations, showForm, employee, to
   const isPending = isSavePending || isUpdatePending
 
   const defaultValues: Partial<EmployeeFormValues> = {
-    id: '',
+    id: employee?.id ?? '',
     name: employee?.name ?? '',
     dateOfBirth: employee?.dateOfBirth ?? format(new Date(), 'yyyy-MM-dd'),
     gender: employee?.gender ?? 'male',
@@ -89,7 +89,6 @@ const Form = ({ departments, designations, workLocations, showForm, employee, to
       formData.append(key, data[key as keyof typeof data].toString())
     })
 
-    formData.append('id', employee?.id ?? '')
     if (employee?.id) {
       startTransition(() => updateAction(formData))
     } else {
@@ -116,7 +115,7 @@ const Form = ({ departments, designations, workLocations, showForm, employee, to
             <div className='flex flex-col gap-4'>
               <div className='flex gap-4'>
                 <div className='grid w-full gap-1.5'>
-                  <RequiredLabel htmlFor='firstName'>First Name</RequiredLabel>
+                  <RequiredLabel htmlFor='firstName'>Full Name</RequiredLabel>
                   <Controller
                     name='name'
                     control={control}

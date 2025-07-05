@@ -7,15 +7,16 @@ import { getBusinessId } from "@/lib/business";
 
 // CREATE
 export async function saveDepartment(prevState: any, formData: FormData) {
-    const result = departmentSchema.safeParse(Object.fromEntries(formData));
+    const parsed = departmentSchema.safeParse(Object.fromEntries(formData));
 
-    if (!result.success) {
+    if (!parsed.success) {
         return {
             status: false,
             message: "Invalid department",
         };
     }
 
+    const { id, ...rest } = parsed.data;
     try {
         const business = await getBusinessId()
 
@@ -28,7 +29,7 @@ export async function saveDepartment(prevState: any, formData: FormData) {
 
         await prisma.department.create({
             data: {
-                ...result.data,
+                ...rest,
                 tenantId: businessId,
             },
         });
@@ -38,10 +39,10 @@ export async function saveDepartment(prevState: any, formData: FormData) {
             status: true,
             message: "Department created successfully",
         };
-    } catch (err) {
+    } catch (err: any) {
         return {
             status: false,
-            message: "Database error occurred",
+            message: "Database error occurred:" + err?.message,
         };
     }
 }

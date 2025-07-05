@@ -2,9 +2,12 @@ import { WorkLocation } from '@prisma/client'
 import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = baseUrl +'/api/work-locations'
 
-export const getWorkLocations = async (queryParams?: { [key: string]: string }): Promise<WorkLocation[]> => {
+const isServer = typeof window === 'undefined';
+const BASE_URL = isServer ? baseUrl + '/api/work-locations' : '/api/work-locations';
+
+
+export const getWorkLocations = async (cookie: string, queryParams?: { [key: string]: string }): Promise<WorkLocation[]> => {
 
   let params = new URLSearchParams()
   if (queryParams) {
@@ -17,8 +20,13 @@ export const getWorkLocations = async (queryParams?: { [key: string]: string }):
   }
 
   try {
-    const res = await fetch(`${BASE_URL}?${params.toString()}`)
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+      headers: {
+        Cookie: cookie
+      }
+    })
     const data = await res.json()
+     console.log(data,'data')
     return data
   } catch (error) {
     toast.error('Error fetching work location')

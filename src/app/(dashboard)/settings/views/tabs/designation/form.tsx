@@ -69,7 +69,6 @@ const Form = ({ designation, showForm, toggleForm }: FormProps) => {
     })
 
     if (designation?.id) {
-      formData.append('id', designation?.id ?? '')
       startTransition(() => updateAction(formData))
     } else {
       startTransition(() => saveAction(formData))

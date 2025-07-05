@@ -2,9 +2,11 @@ import { Designation } from '@prisma/client'
 import { baseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
-const BASE_URL = baseUrl + '/api/designations'
+const isServer = typeof window === 'undefined';
+const BASE_URL = isServer ? baseUrl + '/api/designations' : '/api/designations';
 
-export const getDesignations = async (queryParams?: { [key: string]: string }): Promise<Designation[]> => {
+
+export const getDesignations = async ( cookie:string, queryParams?: { [key: string]: string },): Promise<Designation[]> => {
 
   let params = new URLSearchParams()
   if (queryParams) {
@@ -17,7 +19,11 @@ export const getDesignations = async (queryParams?: { [key: string]: string }): 
   }
 
   try {
-    const res = await fetch(`${BASE_URL}?${params.toString()}`)
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+      headers:{
+        Cookie: cookie
+      }
+    })
     const data = await res.json()
     return data
   } catch (error) {
@@ -29,7 +35,7 @@ export const getDesignations = async (queryParams?: { [key: string]: string }): 
 
 export const getDesignation = async (id: string): Promise<Designation | null> => {
   try {
-    const res = await fetch(`${BASE_URL}/${id}`)
+    const res = await fetch(`${BASE_URL}/${id}`,)
     const data = await res.json()
     return data
   } catch (error) {
